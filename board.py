@@ -2,12 +2,13 @@
 heuristic/entropy measurements
 """
 import random
+from copy import deepcopy
 
 def board_str_to_matrix(string):
     """Returns a matrix representation of a string of n characters, each of
     which representing the position of the ith queen in the jth row"""
     n = len(string)
-    matrix = [[0 for i in range(n)] for j in range(n)]
+    matrix = [[0 for j in range(n)] for i in range(n)]
 
     for j, c in enumerate(string):
         i = int(c)
@@ -17,8 +18,8 @@ def board_str_to_matrix(string):
 
 def board_matrix_to_str(matrix):
     """Returns the string representation of an n x n board where each of the
-    characters of the string represents the jth position of the ith queen by
-    column"""
+    characters of the string represents the ith position of the queen in the
+    jth column"""
     string = ""
     n = len(matrix)
 
@@ -37,13 +38,62 @@ def random_board(n=8):
     Args:
         n (int): The dimension of the n x n board.
     """
-    matrix = [[0 for _ in range(n)] for _ in range(n)]
+    matrix = [[0 for j in range(n)] for i in range(n)]
 
     for j in range(n):
         i = random.randint(0, n - 1)
         matrix[i][j] = 1
 
     return Chessboard(board_matrix=matrix)
+
+def queen_locations(board):
+    """Returns a list with the locations of the queens in a board.
+
+    Args:
+        board (list of list): the current board.
+    """
+    n = len(board)
+
+    queens = []
+
+    for j in range(n):
+        for i in range(n):
+            if board[i][j] == 1:
+                queens.append((i, j))
+
+    return queens
+
+def is_attacking(i1, j1, i2, j2):
+    """Returns True if the two queen locations are attacking each other.
+
+    Args:
+        i1, j1 (int): the coordinates of the first queen.
+        i2, j2 (int): the coordinates of the second queen.
+    """
+    return (i1 == i2 or                   # Same row
+            j1 == j2 or                   # Same column
+            abs(i1 - i2) == abs(j1 - j2)) # Same diagonal
+
+def number_of_conflicts(board):
+    """Returns the number of queens attacking each other from a board.
+
+    Args:
+        board (list of list): the current board.
+    """
+    conflicts = 0
+    queens = queen_locations(board)
+    n = len(queens)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            i1, j1 = queens[i]
+            i2, j2 = queens[j]
+
+            if is_attacking(i1, j1, i2, j2):
+                conflicts += 1
+
+    return conflicts
+
 
 class Chessboard:
     """Represents a n x n board with n queens.
@@ -59,24 +109,60 @@ class Chessboard:
         # Defines an empty board.
         else:
             # The matrix representation of the board.
-            self.board = [[0 for i in range(n)] for j in range(n)]
+            self.board = [[0 for j in range(n)] for i in range(n)]
 
             # Places queens in the first row of the board.
             for i in range(n):
                 self.board[0][i] = 1
 
-        self.__update_state()
-
-    def __update_state(self):
-        """Updates the internal variables of this board."""
-
     def __repr__(self):
         return str(self.board)
 
     def __str__(self):
-        """Returns the representation of this board."""
+        """Returns the square representation of this board."""
         rows = []
         for r in self.board:
             s = " ".join(str(s) for s in r)
             rows.append(s)
         return "\n".join(rows)
+
+    def conflict_matrix(self):
+        """Returns the matrix of conflicts of moving the queen from a column to
+        a different row.
+        """
+        queens = queen_locations(self.board)
+        n = len(queens)
+
+        # Temporary matrix to find conflicts
+        temp_matrix = deepcopy(self.board)
+
+        # Conflict matrix
+        conflicts = deepcopy(self.board)
+
+        for i, j in queens:
+            temp_matrix[i][j] = 0
+            conflicts[i][j] = "X" # represents the queen location
+
+            # Loop through the rows of the current queen column
+            for k in range(n):
+                if k != i:
+                    temp_matrix[k][j] = 1
+
+                    n_conflicts = number_of_conflicts(temp_matrix)
+                    conflicts[k][j] = n_conflicts
+
+                    temp_matrix[k][j] = 0
+
+            temp_matrix[i][j] = 1
+
+        return conflicts
+
+    def minimum_queens(self):
+        """Returns a list of queens that could be moved to the minimum conflict
+        locations.
+
+        Returns a list of pairs ((i1, j1), (i2, j2)), where the first
+        parameter represents the queen location, and the second parameter
+        represents a location that the queen could move to with lower number of
+        conflicts.
+        """
