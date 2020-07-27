@@ -103,6 +103,15 @@ def pretty_print_matrix(matrix):
         rows.append(s)
     return "\n".join(rows)
 
+def pretty_print_board(matrix):
+    """Returns a pretty print representation of a board where the queen is
+    represented as X"""
+    rows = []
+    for r in matrix:
+        s = " ".join(("X" if s == 1 else "-") for s in r)
+        rows.append(s)
+    return "\n".join(rows)
+
 class Chessboard:
     """Represents a n x n board with n queens.
 
@@ -128,10 +137,10 @@ class Chessboard:
 
     def __str__(self):
         """Returns the square representation of this board."""
-        return pretty_print_matrix(self.board)
+        return pretty_print_board(self.board)
 
     def as_string(self):
-        return self.__str__()
+        return pretty_print_matrix(self.board)
 
     def conflict_matrix(self):
         """Returns the matrix of conflicts of moving the queen from a column to

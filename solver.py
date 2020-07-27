@@ -10,7 +10,7 @@ class Solver:
             board = random_board(n)
 
         self.n = n
-        self.board = board
+        self.board = deepcopy(board)
 
     def solve(self):
         raise NotImplementedError
