@@ -94,6 +94,14 @@ def number_of_conflicts(board):
 
     return conflicts
 
+def pretty_print_matrix(matrix):
+    """Returns a pretty print string of a n x n matrix of single digits or
+    characters."""
+    rows = []
+    for r in matrix:
+        s = " ".join(str(s) for s in r)
+        rows.append(s)
+    return "\n".join(rows)
 
 class Chessboard:
     """Represents a n x n board with n queens.
@@ -120,11 +128,10 @@ class Chessboard:
 
     def __str__(self):
         """Returns the square representation of this board."""
-        rows = []
-        for r in self.board:
-            s = " ".join(str(s) for s in r)
-            rows.append(s)
-        return "\n".join(rows)
+        return pretty_print_matrix(self.board)
+
+    def as_string(self):
+        return self.__str__()
 
     def conflict_matrix(self):
         """Returns the matrix of conflicts of moving the queen from a column to
@@ -157,6 +164,15 @@ class Chessboard:
 
         return conflicts
 
+    def move_queen(self, i1, j1, i2, j2):
+        """Move queen from location (i1, j1) to (i2, j2)."""
+        self.board[i1][j1] = 0
+        self.board[i2][j2] = 1
+
+    def conflicts(self):
+        """Returns the number of conflicts of this board."""
+        return number_of_conflicts(self.board)
+
     def minimum_queens(self):
         """Returns a list of queens that could be moved to the minimum conflict
         locations.
@@ -166,3 +182,62 @@ class Chessboard:
         represents a location that the queen could move to with lower number of
         conflicts.
         """
+        queens = queen_locations(self.board)
+        n = len(queens)
+
+        conflicts = self.conflict_matrix()
+
+        # List of minimum queens
+        minima = []
+
+        # Find the minimum value of conflicts
+        minimum_conflict = float('inf')
+
+        for i in range(n):
+            for j in range(n):
+                if (conflicts[i][j] != 'X' and
+                    conflicts[i][j] < minimum_conflict):
+
+                    minimum_conflict = conflicts[i][j]
+
+        # Find the positions equal to the minimum
+        for i, j in queens:
+            for k in range(n):
+                if conflicts[k][j] == minimum_conflict:
+                    minima.append(((i, j), (k, j)))
+
+        return minima
+
+    def random_minimal_successor(self):
+        """Updates the board with a random minimal successor.
+        """
+        possible_moves = self.minimum_queens()
+        heuristic = self.conflicts()
+
+        if heuristic != 0:
+            queen, next_move = random.choice(possible_moves)
+            i1, j1 = queen
+            i2, j2 = next_move
+
+            # print("h = {}, moving queen {} to {}".format(heuristic, queen,
+                                                         # next_move))
+
+            self.move_queen(i1, j1, i2, j2)
+
+    def random_successor(self):
+        """Updates the board at random.
+        """
+        n = len(self.board)
+
+        # Pick a queen at random to move
+        queens = queen_locations(self.board)
+        i1, j1 = random.choice(queens)
+
+        # Pick a random different row to move to
+        i2 = i1
+        while i2 == i1:
+            i2 = random.randint(0, n-1)
+
+        print("moving queen {} to {}".format((i1, j1), (i2, j1)))
+
+        self.move_queen(i1, j1, i2, j1)

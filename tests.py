@@ -1,4 +1,5 @@
 from board import *
+from solver import *
 
 board1 = [
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -47,7 +48,7 @@ def test_number_of_conflicts():
     b = random_board()
     print(b)
     print(number_of_conflicts(b.board))
-    # print(number_of_conflicts(board2))
+    print(number_of_conflicts(board2))
 
 def test_conflict_matrix():
     b = Chessboard(board_matrix=board2)
@@ -56,10 +57,58 @@ def test_conflict_matrix():
 
     print(b.conflict_matrix())
 
+def test_minimum_queens():
+    b = Chessboard(board_matrix=board2)
+    print(b)
+    print(pretty_print_matrix(b.conflict_matrix()))
+    print(b.minimum_queens())
+
+def test_random_minimal_successor():
+    b = Chessboard(board_matrix=board2)
+    print(b)
+
+    random_minimal_successor(b)
+    print(b)
+
+def test_random_minimal_successor_2():
+    b = random_board()
+    print("h =", b.conflicts())
+    print(b)
+
+    for _ in range(10):
+        random_minimal_successor(b)
+        print("h =", b.conflicts())
+        print(b)
+
+def test_hill_climbing_solver():
+    b = random_board(n=10)
+    print("h =", b.conflicts())
+    print(b)
+
+    solver = HillClimbingSolver(board=b, n=4)
+
+    solution = solver.solve()
+    print("h =", solution.conflicts())
+    print(solution)
+
+def test_random_successor():
+    b = random_board()
+    print("h =", b.conflicts())
+    print(b)
+
+    b.random_successor()
+    print("h =", b.conflicts())
+    print(b)
+
+
 if __name__ == '__main__':
     # test_board_str_to_matrix()
     # test_board_matrix_to_str()
     # test_random_chessboard()
     # test_queen_locations()
     # test_number_of_conflicts()
-    test_conflict_matrix()
+    # test_conflict_matrix()
+    # test_minimum_queens()
+    # test_random_minimal_successor_2()
+    test_hill_climbing_solver()
+    # test_random_successor()
