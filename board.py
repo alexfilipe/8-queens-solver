@@ -238,6 +238,6 @@ class Chessboard:
         while i2 == i1:
             i2 = random.randint(0, n-1)
 
-        print("moving queen {} to {}".format((i1, j1), (i2, j1)))
+        # print("moving queen {} to {}".format((i1, j1), (i2, j1)))
 
         self.move_queen(i1, j1, i2, j1)
